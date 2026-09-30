@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار مهارات لوحات المعلومات والتحليل - شركة سلاناك</title>
+
+    <!-- استدعاء Firebase SDK v9 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"; import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        const firebaseConfig = { apiKey: "AIzaSyAkCJB7gUsnPsJRECyDzMSl-UwnHntXjhY", authDomain: "dgdfgb-11356.firebaseapp.com", projectId: "dgdfgb-11356", storageBucket: "dgdfgb-11356.firebasestorage.app", messagingSenderId: "275383365840", appId: "1:275383365840:web:5a733b0f8560d0ac2daed5",
+        measurementId: "G-YDVKKEYZ52" }; try { const app = initializeApp(firebaseConfig); const db = getFirestore(app); window.db = db; window.collection = collection; window.addDoc = addDoc; window.getDocs = getDocs; window.deleteDoc = deleteDoc; window.doc
+        = doc; window.query = query; window.where = where; window.serverTimestamp = serverTimestamp; console.log("تم اتصال Firebase Firestore بنجاح وبأداء فائق!"); } catch (error) { console.error("خطأ في تهيئة Firebase:", error); }
+    </script>
+
+    <style>
+         :root {
+            --neon-cyan: #06b6d4;
+            --neon-blue: #3b82f6;
+            --neon-purple: #8b5cf6;
+            --bg-gradient: linear-gradient(135deg, #030712 0%, #0f172a 100%);
+            --card-bg: rgba(15, 23, 42, 0.85);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(6, 182, 212, 0.25);
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 0 35px rgba(6, 182, 212, 0.15), 0 20px 40px rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            animation: fadeIn 0.4s ease-out;
+            position: relative;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        }
+        
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        .teacher-btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+        
+        .teacher-btn:hover {
+            background: rgba(6, 182, 212, 0.2);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+        /* واجهة الصفحة الترحيبية */
+        
+        #welcome-screen {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .welcome-badge {
+            display: inline-block;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+        }
+        
+        .instructor-signature {
+            margin-top: 25px;
+            font-size: 1.15rem;
+            color: #38bdf8;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+        /* واجهات التطبيق الأخرى مخفية افتراضياً */
+        
+        #quiz-form,
+        #result-container,
+        #teacher-panel,
+        #blocked-container {
+            display: none;
+        }
+        
+        .student-info-box {
+            background: rgba(3, 7, 18, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .student-info-box input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .student-info-box input:focus {
+            border-color: var(--neon-cyan);
+            outline: none;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+        }
+        
+        .question-card {
+            background: rgba(3, 7, 18, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 15px rgba(6, 182, 212, 0.03);
+        }
+        
+        .question-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+        
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 14px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option-label:hover {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+        }
+        
+        .option-label input[type="radio"] {
+            margin-top: 4px;
+            accent-color: var(--neon-cyan);
+            transform: scale(1.2);
+        }
+        
+        .option-text {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+        
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            margin-top: 20px;
+        }
+        
+        .btn-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+        }
+        
+        .score-box {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--success);
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .feedback-item {
+            text-align: right;
+            background: rgba(3, 7, 18, 0.8);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-right: 5px solid var(--border-color);
+        }
+        
+        .feedback-item.correct {
+            border-right-color: var(--success);
+        }
+        
+        .feedback-item.incorrect {
+            border-right-color: var(--danger);
+        }
+        
+        .feedback-item p {
+            font-size: 0.9rem;
+            margin-top: 6px;
+            color: var(--text-muted);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(3, 7, 18, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+        
+        th {
+            background: rgba(6, 182, 212, 0.15);
+            color: #fff;
+        }
+        
+        td {
+            color: #cbd5e1;
+        }
+        
+        .delete-row-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        
+        .delete-row-btn:hover {
+            background: rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .teacher-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .block-box {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <button class="teacher-btn" onclick="openTeacherPanel()">لوحة المعلم 🔒</button>
+            <h1>اختبار مهارات لوحات المعلومات والتحليل</h1>
+            <p>شركة (سلاناك) - تقييم المفاهيم الاستراتيجية واتخاذ القرار</p>
+        </header>
+
+        <!-- 1. الصفحة الترحيبية الأولى -->
+        <div id="welcome-screen">
+            <div class="welcome-badge">تقييم معتمد واحترافي</div>
+            <h2 style="color: #fff; margin-bottom: 15px; font-size: 1.5rem;">أهلاً بك في منصة الاختبارات الذكية</h2>
+            <p style="color: var(--text-muted); line-height: 1.8; max-width: 700px; margin: 0 auto 30px auto;">
+                صُمم هذا الاختبار لتقييم كفاءتك في تحليل البيانات الاستراتيجية، اتخاذ القرارات، والتعامل مع لوحات المعلومات داخل بيئة عمل شركة (سلاناك). يرجى الانتباه أن الاختبار متاح لمرة واحدة فقط لكل جهاز.
+            </p>
+            <div class="instructor-signature">إعداد وإشراف: المهندس إبراهيم المدادحة</div>
+            <button type="button" class="btn-submit" onclick="startExam()" style="max-width: 300px; margin: 30px auto 0 auto;">بدء الاختبار الآن 🚀</button>
+        </div>
+
+        <!-- 2. واجهة الحظر في حال حاول الدخول مجدداً -->
+        <div id="blocked-container">
+            <div class="block-box">
+                <div style="font-size: 3rem; margin-bottom: 15px;">🚫</div>
+                <h2 style="color: #f87171; margin-bottom: 10px;">تم حظر الوصول لهذا الجهاز!</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">
+                    لقد تم إتمام هذا الاختبار مسبقاً من هذا الجهاز. لا يمكن إعادة تقديم الاختبار إلا من خلال إدخال <b>مفتاح التنشيط</b> الخاص الذي يزودك به المعلم.
+                </p>
+                <div style="max-width: 400px; margin: 0 auto; display: flex; gap: 10px;">
+                    <input type="text" id="activation-key" placeholder="أدخل مفتاح التنشيط هنا..." style="flex:1; padding: 12px; background: rgba(3,7,18,0.8); border: 1px solid var(--border-color); border-radius: 8px; color: white; text-align: center;">
+                    <button onclick="verifyActivationKey()" class="btn-submit" style="margin-top:0; padding: 0 20px;">تنشيط</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. نموذج الأسئلة -->
+        <form id="quiz-form">
+            <div class="student-info-box">
+                <input type="text" id="student-name" placeholder="أدخل اسمك الثلاثي الكامل..." required>
+            </div>
+
+            <!-- السؤال الأول -->
+            <div class="question-card" data-q="1">
+                <div class="question-title">
+                    السؤال الأول: هل الاعتماد الحصري على التحليل الوصفي وتفسير سبب ارتفاع الحجوزات في شهر يوليو بناءً على المواسم السابقة يعتبر أسلوباً استراتيجياً تاماً ومحصناً ضد أي تحيز في تفسير البيانات بداخل لوحة معلومات شركة (سلاناك)؟
+                </div>
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="radio" name="q1" value="yes">
+                        <span class="option-text"><b>نعم:</b> لأن تكرار الأنماط والظواهر الموسمية بصورة دورية كل عام يعطي مبرراً ثابتاً للتعامل مع ارتفاع شهر تموز كقاعدة إحصائية ثابتة تدعم اتخاذ القرار التسويقي دون الوقوع في خطأ التحليل.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q1" value="no">
+                        <span class="option-text"><b>لا:</b> لأن الاعتماد الكلي على التوقعات والافتراضات المسبقة يعد نوعاً من أنواع التحيز في تفسير المعلومات وتحليلها، وقد يؤدي إلى إساءة تفسير البيانات وتحليلها من خلال الاعتماد على توقعات وافتراضات مسبقة لتفسير ارتفاع المبيعات أو الحجوزات في ذلك الشهر.</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- السؤال الثاني -->
+            <div class="question-card" data-q="2">
+                <div class="question-title">
+                    السؤال الثاني: هل يُمكن اعتبار قيام شركة (سلاناك) بمراقبة أداء الحجوزات وإدارتها بالاعتماد المطلق على خطوط المؤشر (Sparklines) وحدها كافية لاستغلال الوقت بدقة متناهية بمعزل عن تتبع تدقيق البيانات التاريخية؟
+                </div>
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="radio" name="q2" value="yes">
+                        <span class="option-text"><b>نعم:</b> لأن خطوط المؤشر تمنح لمحة سريعة ومختصرة جداً عن البيانات وتساهم في تحسين العرض بصرياً وتسهيل تفسيرها وتحليلها دون إهدار الوقت في مراجعة البيانات التفصيلية.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q2" value="no">
+                        <span class="option-text"><b>لا:</b> لأن تجاهل تاريخ البيانات وعدم النظر فيه داخل لوحة المعلومات -إضافة لخطوط المؤشر- يمكن أن يؤدي إلى تحليل اتجاهات خاطئ مثل التركيز على عدد العطلات في شهر معين وتجاهل تاريخ البيانات الشامل والتواريخ الأخرى.</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- السؤال الثالث -->
+            <div class="question-card" data-q="3">
+                <div class="question-title">
+                    السؤال الثالث: هل يمكن لآلية دمج الجداول المحورية (Pivot Tables) في لوحة معلومات شركة (سلاناك) أن تلغي تماماً أي احتمال لوجود بيانات قديمة أو أخطاء في الإدخال قد تؤثر على اتخاذ القرارات؟
+                </div>
+                <div class="options-group">
+                    <label class="option-label">
+                        <input type="radio" name="q3" value="yes">
+                        <span class="option-text"><b>نعم:</b> لأن الجداول المحورية تتميز بالمرونة الفورية وسهولة التحديث وتنظيم البيانات المعقدة بشكل تلقائي، مما يضمن دقتها المطلقة بمعزل عن جودة البيانات المدخلة يوماً بي يوم.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="q3" value="no">
+                        <span class="option-text"><b>لا:</b> لأن استخدام بيانات قديمة وغير محدثة أو إدخال البيانات بطريقة غير دقيقة يمكن أن يؤدي إلى استنتاجات غير صحيحة وقرارات مبنية على معلومات غير صحيحة لا تعكس الاتجاهات الحالية الحقيقية وتؤدي لاستراتيجيات غير فعالة.</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="button" class="btn-submit" onclick="submitQuiz()">إرسال الإجابات وتقييم الاختبار</button>
+        </form>
+
+        <!-- 4. شاشة عرض النتيجة للطالب -->
+        <div id="result-container" style="text-align: center;">
+            <h2>نتيجة الاختبار</h2>
+            <div class="score-box" id="score-display">0 / 30</div>
+            <p id="attempts-info" style="color: var(--secondary); margin-bottom: 10px; font-weight: bold;"></p>
+            <p id="score-message" style="margin-bottom: 20px; color: var(--text-muted);"></p>
+            <div id="feedback-list"></div>
+            <p style="color: #f87171; margin-top: 20px; font-size: 0.9rem;">⚠️ تم حظر هذا الجهاز من إعادة تقديم الاختبار تلقائياً بنجاح.</p>
+        </div>
+
+        <!-- 5. لوحة المعلم المشفرة -->
+        <div id="teacher-panel">
+            <h2>لوحة متابعة المعلم 📊</h2>
+            <p style="color: var(--text-muted); margin-bottom: 15px;">سجل نتائج الطلاب وإدارتها بشكل فوري</p>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم الطالب</th>
+                            <th>العلامة</th>
+                            <th>عدد المحاولات</th>
+                            <th>وقت المحاولة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table-body">
+                        <tr>
+                            <td colspan="5">جاري جلب البيانات بأداء عالي...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="teacher-actions">
+                <button type="button" class="btn-submit btn-danger" onclick="clearAllData()">حذف كافة النتائج 🗑️</button>
+                <button type="button" class="btn-submit" onclick="location.reload()" style="background: #64748b;">العودة للرئيسية</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            q1: 'no',
+            q2: 'no',
+            q3: 'no'
+        };
+        const explanations = {
+            q1: "الإجابة الصحيحة هي (لا)، لأن الاعتماد الكلي على التوقعات والافتراضات المسبقة يعد نوعاً من أنواع التحيز في تفسير المعلومات وتحليلها لتفسير ارتفاع عدد العطلات في شهر يوليو.",
+            q2: "الإجابة الصحيحة هي (لا)، لأن تجاهل تاريخ البيانات وعدم النظر فيه داخل لوحة المعلومات قد يؤدي إلى تحليل اتجاهات خاطئ والتركيز على شهر معين دون الآخر.",
+            q3: "الإجابة الصحيحة هي (لا)، لأن استخدام بيانات قديمة وغير محدثة أو إدخال البيانات بطريقة غير دقيقة يؤدي إلى استنتاجات غير صحيحة وقرارات مبنية على معلومات غير صحيحة."
+        };
+
+        // مفتاح التنشيط الخاص بك (يمكنك تغييره هنا متى شئت)
+        const MASTER_ACTIVATION_KEY = "Ibrahim2026";
+
+        // التحقق من حالة الحظر فور فتح الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            const isBlocked = localStorage.getItem('device_exam_blocked');
+            if (isBlocked === 'true') {
+                document.getElementById('welcome-screen').style.display = 'none';
+                document.getElementById('blocked-container').style.display = 'block';
+            }
+        });
+
+        // الانتقال من الصفحة الترحيبية للاختبار
+        function startExam() {
+            const isBlocked = localStorage.getItem('device_exam_blocked');
+            if (isBlocked === 'true') {
+                document.getElementById('welcome-screen').style.display = 'none';
+                document.getElementById('blocked-container').style.display = 'block';
+                return;
+            }
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('quiz-form').style.display = 'block';
+        }
+
+        function verifyActivationKey() {
+            const enteredKey = document.getElementById('activation-key').value.trim();
+            if (enteredKey === MASTER_ACTIVATION_KEY) {
+                localStorage.removeItem('device_exam_blocked');
+                alert('تم تنشيط الجهاز بنجاح!');
+                location.reload();
+            } else {
+                alert('مفتاح التنشيط غير صحيح! يرجى مراجعة المهندس إبراهيم المدادحة.');
+            }
+        }
+
+        async function submitQuiz() {
+            const studentName = document.getElementById('student-name').value.trim();
+            if (!studentName) {
+                alert('الرجاء إدخال اسمك الثلاثي الكامل قبل إرسال الاختبار!');
+                document.getElementById('student-name').focus();
+                return;
+            }
+
+            let score = 0;
+            let feedbackHTML = '';
+
+            for (let i = 1; i <= 3; i++) {
+                let qKey = 'q' + i;
+                let selectedOption = document.querySelector(`input[name="${qKey}"]:checked`);
+                let isCorrect = selectedOption && selectedOption.value === correctAnswers[qKey];
+
+                if (isCorrect) {
+                    score += 10;
+                    feedbackHTML += `<div class="feedback-item correct"><strong>السؤال ${i}: إجابة صحيحة!</strong><p>${explanations[qKey]}</p></div>`;
+                } else {
+                    let userText = selectedOption ? (selectedOption.value === 'yes' ? 'نعم' : 'لا') : 'لم تقم بالإجابة';
+                    feedbackHTML += `<div class="feedback-item incorrect"><strong>السؤال ${i}: إجابة خاطئة (اختيارك: ${userText})</strong><p>${explanations[qKey]}</p></div>`;
+                }
+            }
+
+            let attemptCount = 1;
+
+            try {
+                if (!window.db) throw new Error("قاعدة البيانات غير متصلة.");
+
+                const qRef = window.query(
+                    window.collection(window.db, "examResults"),
+                    window.where("studentName", "==", studentName)
+                );
+                const querySnapshot = await window.getDocs(qRef);
+                attemptCount = querySnapshot.size + 1;
+
+                window.addDoc(window.collection(window.db, "examResults"), {
+                    studentName: studentName,
+                    score: score,
+                    attemptNumber: attemptCount,
+                    timestamp: window.serverTimestamp()
+                });
+            } catch (error) {
+                console.error("خطأ أثناء الحفظ الفوري: ", error);
+            }
+
+            // تفعيل حظر الجهاز فوراً وصارماً
+            localStorage.setItem('device_exam_blocked', 'true');
+
+            // عرض النتيجة للطالب
+            document.getElementById('quiz-form').style.display = 'none';
+            let resultContainer = document.getElementById('result-container');
+            resultContainer.style.display = 'block';
+
+            document.getElementById('score-display').innerText = `${score} / 30`;
+            document.getElementById('attempts-info').innerText = `هذه محاولتك رقم: ${attemptCount}`;
+            document.getElementById('score-message').innerText = score === 30 ? "ممتاز جداً! إجاباتك دقيقة وتنم عن فهم عميق." : "شكراً لإتمامك الاختبار، يمكنك مراجعة الإجابات الصحيحة أعلاه.";
+            document.getElementById('feedback-list').innerHTML = feedbackHTML;
+        }
+
+        async function openTeacherPanel() {
+            const pin = prompt("الرجاء إدخال رمز لوحة المعلم:");
+            if (pin === "2000") {
+                document.getElementById('welcome-screen').style.display = 'none';
+                document.getElementById('quiz-form').style.display = 'none';
+                document.getElementById('result-container').style.display = 'none';
+                document.getElementById('blocked-container').style.display = 'none';
+                document.getElementById('teacher-panel').style.display = 'block';
+
+                loadTeacherData();
+            } else if (pin !== null) {
+                alert("الرمز السري غير صحيح!");
+            }
+        }
+
+        async function loadTeacherData() {
+            try {
+                if (!window.db) throw new Error("قاعدة البيانات غير متصلة.");
+
+                const querySnapshot = await window.getDocs(window.collection(window.db, "examResults"));
+                let rowsHTML = '';
+
+                if (querySnapshot.empty) {
+                    rowsHTML = `<tr><td colspan="5">لا توجد بيانات مسجلة حتى الآن.</td></tr>`;
+                } else {
+                    querySnapshot.forEach((documentSnap) => {
+                        const data = documentSnap.data();
+                        const docId = documentSnap.id;
+                        let dateStr = "فوري";
+                        if (data.timestamp && data.timestamp.seconds) {
+                            dateStr = new Date(data.timestamp.seconds * 1000).toLocaleString('ar-JO');
+                        }
+                        rowsHTML += `
+                            <tr id="row-${docId}">
+                                <td>${data.studentName}</td>
+                                <td><b style="color: var(--success);">${data.score} / 30</b></td>
+                                <td>المحاولة رقم ${data.attemptNumber}</td>
+                                <td>${dateStr}</td>
+                                <td><button class="delete-row-btn" onclick="deleteRecord('${docId}')">حذف</button></td>
+                            </tr>
+                        `;
+                    });
+                }
+                document.getElementById('students-table-body').innerHTML = rowsHTML;
+            } catch (error) {
+                console.error("خطأ في جلب البيانات: ", error);
+                document.getElementById('students-table-body').innerHTML = `<tr><td colspan="5">تعذر تحميل البيانات. تأكد من الاتصال.</td></tr>`;
+            }
+        }
+
+
+        async function deleteRecord(docId) {
+            if (confirm("هل أنت متأكد من حذف هذه النتيجة نهائياً؟")) {
+                try {
+                    await window.deleteDoc(window.doc(window.db, "examResults", docId));
+                    document.getElementById(`row-${docId}`).remove();
+                    alert("تم حذف السجل بنجاح.");
+                } catch (error) {
+                    console.error("خطأ في الحذف: ", error);
+                    alert("فشل حذف السجل.");
+                }
+            }
+        }
+
+        async function clearAllData() {
+            if (confirm("تحذير تدميري: هل تريد حقاً حذف جميع نتائج جميع الطلاب نهائياً؟")) {
+                try {
+                    const querySnapshot = await window.getDocs(window.collection(window.db, "examResults"));
+                    let deletePromises = [];
+                    querySnapshot.forEach((documentSnap) => {
+                        deletePromises.push(window.deleteDoc(window.doc(window.db, "examResults", documentSnap.id)));
+                    });
+                    await Promise.all(deletePromises);
+                    alert("تم مسح كافة البيانات بنجاح.");
+                    loadTeacherData();
+                } catch (error) {
+                    console.error("خطأ في الحذف الجماعي: ", error);
+                    alert("حدث خطأ أثناء عملية الحذف.");
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>
